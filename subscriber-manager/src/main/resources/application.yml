@@ -1,0 +1,30 @@
+server:
+  port: 8088
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/subdata
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  liquibase:
+    url: jdbc:postgresql://localhost:5432/subdata
+    user: postgres
+    password: root
+    change-log: liquibase/changelog/liquibase-changelog-master.xml
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    show-sql: true
+    properties:
+      persistence:
+        sharedCache:
+          mode: ENABLE_SELECTIVE
+      hibernate:
+        format_sql: true
+        cache:
+          use_second_level_cache: true
+          provider_configuration_file_resource_path: classpath:ehcache.xml
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
