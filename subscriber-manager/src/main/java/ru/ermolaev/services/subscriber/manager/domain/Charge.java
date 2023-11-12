@@ -35,6 +35,10 @@ public class Charge {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CHARGE_ID_SEQ")
     private Long id;
 
+    @Column(name = "EXTERNAL_ID", nullable = false,
+            unique = true, updatable = false)
+    private Long externalId;
+
     @Column(name = "CHARGE_DATE")
     private LocalDate chargeDate;
 

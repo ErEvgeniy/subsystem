@@ -24,6 +24,10 @@ public class City {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CITY_ID_SEQ")
     private Long id;
 
+    @Column(name = "EXTERNAL_ID", nullable = false,
+            unique = true, updatable = false)
+    private Long externalId;
+
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 

@@ -40,6 +40,10 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PAYMENT_ID_SEQ")
     private Long id;
 
+    @Column(name = "EXTERNAL_ID", nullable = false,
+            unique = true, updatable = false)
+    private Long externalId;
+
     @Column(name = "PAYMENT_DATE")
     private LocalDate paymentDate;
 

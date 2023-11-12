@@ -24,6 +24,10 @@ public class ChargeTarget {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CHARGE_TARGET_ID_SEQ")
     private Long id;
 
+    @Column(name = "EXTERNAL_ID", nullable = false,
+            unique = true, updatable = false)
+    private Long externalId;
+
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 

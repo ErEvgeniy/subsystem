@@ -42,6 +42,10 @@ public class Subscriber {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SUBSCRIBER_ID_SEQ")
     private Long id;
 
+    @Column(name = "EXTERNAL_ID", nullable = false,
+            unique = true, updatable = false)
+    private Long externalId;
+
     @Column(name = "FIRSTNAME", nullable = false)
     private String firstname;
 
@@ -107,9 +111,5 @@ public class Subscriber {
 
     @Column(name = "CONNECTION_DATE")
     private LocalDate connectionDate;
-
-    @Column(name = "EXTERNAL_ID", nullable = false,
-            unique = true, updatable = false)
-    private Long externalId;
 
 }

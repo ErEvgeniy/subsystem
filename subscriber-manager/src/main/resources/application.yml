@@ -3,12 +3,12 @@ server:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/subdata
+    url: jdbc:postgresql://localhost:5432/sbsdb
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver
   liquibase:
-    url: jdbc:postgresql://localhost:5432/subdata
+    url: jdbc:postgresql://localhost:5432/sbsdb
     user: postgres
     password: root
     change-log: liquibase/changelog/liquibase-changelog-master.xml
