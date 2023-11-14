@@ -1,6 +1,6 @@
 package ru.ermolaev.services.data.actuator.step;
 
-import lombok.RequiredArgsConstructor;
+import org.ehcache.CacheManager;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -15,22 +15,27 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ermolaev.services.data.actuator.classifier.MigrationDataClassifier;
 import ru.ermolaev.services.data.actuator.model.Street;
-import ru.ermolaev.services.data.actuator.model.WriteStrategy;
 
 import javax.sql.DataSource;
 
+import static ru.ermolaev.services.data.actuator.tasklet.StreetCacheTaskletConfig.STREETS_CACHE_NAME;
+
 @Configuration
-@RequiredArgsConstructor
-public class StreetMigrationStepConfig {
+public class StreetMigrationStepConfig extends AbstractMigrationStepConfig {
 
-    private final JobRepository jobRepository;
-
-    private final PlatformTransactionManager platformTransactionManager;
+    public StreetMigrationStepConfig(
+            CacheManager cacheManager,
+            JobRepository jobRepository,
+            PlatformTransactionManager platformTransactionManager,
+            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate
+    ) {
+        super(cacheManager, jobRepository, platformTransactionManager, targetJdbcTemplate);
+    }
 
     @Bean
     public JdbcCursorItemReader<Street> sourceStreetReader(
@@ -44,18 +49,16 @@ public class StreetMigrationStepConfig {
     }
 
     @Bean
-    public ItemProcessor<Street, Street> streetStrategyProcessor(
-            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate) {
+    public ItemProcessor<Street, Street> streetStrategyProcessor() {
         return street -> {
-            String sql = "SELECT COUNT(*) FROM streets WHERE external_id = :id";
-            MapSqlParameterSource parameters = new MapSqlParameterSource()
-                    .addValue("id", street.getId());
-            Integer existedEntry = targetJdbcTemplate.queryForObject(sql, parameters, Integer.class);
-            if (existedEntry != null && existedEntry > 0) {
-                street.setWriteStrategy(WriteStrategy.UPDATE);
-            }
+            resolveWriteStrategy(street);
             return street;
         };
+    }
+
+    @Override
+    protected String getCacheName() {
+        return STREETS_CACHE_NAME;
     }
 
     @Bean
@@ -90,6 +93,7 @@ public class StreetMigrationStepConfig {
     }
 
     @Bean
+    @Transactional
     public Step streetMigrationStep(
             JdbcCursorItemReader<Street> sourceStreetReader,
             ItemProcessor<Street, Street> streetStrategyProcessor,

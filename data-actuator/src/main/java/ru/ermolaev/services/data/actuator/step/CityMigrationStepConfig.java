@@ -1,6 +1,6 @@
 package ru.ermolaev.services.data.actuator.step;
 
-import lombok.RequiredArgsConstructor;
+import org.ehcache.CacheManager;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -15,22 +15,27 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ermolaev.services.data.actuator.classifier.MigrationDataClassifier;
 import ru.ermolaev.services.data.actuator.model.City;
-import ru.ermolaev.services.data.actuator.model.WriteStrategy;
 
 import javax.sql.DataSource;
 
+import static ru.ermolaev.services.data.actuator.tasklet.CityCacheTaskletConfig.CITIES_CACHE_NAME;
+
 @Configuration
-@RequiredArgsConstructor
-public class CityMigrationStepConfig {
+public class CityMigrationStepConfig extends AbstractMigrationStepConfig {
 
-    private final JobRepository jobRepository;
-
-    private final PlatformTransactionManager platformTransactionManager;
+    public CityMigrationStepConfig(
+            CacheManager cacheManager,
+            JobRepository jobRepository,
+            PlatformTransactionManager platformTransactionManager,
+            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate
+    ) {
+        super(cacheManager, jobRepository, platformTransactionManager, targetJdbcTemplate);
+    }
 
     @Bean
     public JdbcCursorItemReader<City> sourceCityReader(
@@ -44,18 +49,16 @@ public class CityMigrationStepConfig {
     }
 
     @Bean
-    public ItemProcessor<City, City> cityStrategyProcessor(
-            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate) {
+    public ItemProcessor<City, City> cityStrategyProcessor() {
         return city -> {
-            String sql = "SELECT COUNT(*) FROM cities WHERE external_id = :id";
-            MapSqlParameterSource parameters = new MapSqlParameterSource()
-                    .addValue("id", city.getId());
-            Integer existedEntry = targetJdbcTemplate.queryForObject(sql, parameters, Integer.class);
-            if (existedEntry != null && existedEntry > 0) {
-                city.setWriteStrategy(WriteStrategy.UPDATE);
-            }
+            resolveWriteStrategy(city);
             return city;
         };
+    }
+
+    @Override
+    protected String getCacheName() {
+        return CITIES_CACHE_NAME;
     }
 
     @Bean
@@ -90,6 +93,7 @@ public class CityMigrationStepConfig {
     }
 
     @Bean
+    @Transactional
     public Step cityMigrationStep(
             JdbcCursorItemReader<City> sourceCityReader,
             ItemProcessor<City, City> cityStrategyProcessor,

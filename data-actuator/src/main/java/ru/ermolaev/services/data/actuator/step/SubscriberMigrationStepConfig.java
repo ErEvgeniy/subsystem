@@ -1,6 +1,6 @@
 package ru.ermolaev.services.data.actuator.step;
 
-import lombok.RequiredArgsConstructor;
+import org.ehcache.CacheManager;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -15,22 +15,27 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ermolaev.services.data.actuator.classifier.MigrationDataClassifier;
 import ru.ermolaev.services.data.actuator.model.Subscriber;
-import ru.ermolaev.services.data.actuator.model.WriteStrategy;
 
 import javax.sql.DataSource;
 
+import static ru.ermolaev.services.data.actuator.tasklet.SubscriberCacheTaskletConfig.SUBSCRIBERS_CACHE_NAME;
+
 @Configuration
-@RequiredArgsConstructor
-public class SubscriberMigrationStepConfig {
+public class SubscriberMigrationStepConfig extends AbstractMigrationStepConfig {
 
-    private final JobRepository jobRepository;
-
-    private final PlatformTransactionManager platformTransactionManager;
+    public SubscriberMigrationStepConfig(
+            CacheManager cacheManager,
+            JobRepository jobRepository,
+            PlatformTransactionManager platformTransactionManager,
+            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate
+    ) {
+        super(cacheManager, jobRepository, platformTransactionManager, targetJdbcTemplate);
+    }
 
     @Bean
     public JdbcCursorItemReader<Subscriber> sourceSubscriberReader(
@@ -47,33 +52,21 @@ public class SubscriberMigrationStepConfig {
     }
 
     @Bean
-    public ItemProcessor<Subscriber, Subscriber> subscriberStrategyProcessor(
-            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate) {
+    public ItemProcessor<Subscriber, Subscriber> subscriberStrategyProcessor() {
         return subscriber -> {
             String[] nameParts = subscriber.getFullName().split(" ");
+            subscriber.setLastname(nameParts.length > 0 ? nameParts[0] : null);
+            subscriber.setFirstname(nameParts.length > 1 ? nameParts[1] : null);
+            subscriber.setPatronymic(nameParts.length > 2 ? nameParts[2] : null);
 
-            switch (nameParts.length) {
-                case 1 -> subscriber.setLastname(nameParts[0]);
-                case 2 -> {
-                    subscriber.setLastname(nameParts[0]);
-                    subscriber.setFirstname(nameParts[1]);
-                }
-                case 3 -> {
-                    subscriber.setLastname(nameParts[0]);
-                    subscriber.setFirstname(nameParts[1]);
-                    subscriber.setPatronymic(nameParts[2]);
-                }
-            }
-
-            String sql = "SELECT COUNT(*) FROM subscribers WHERE external_id = :id";
-            MapSqlParameterSource parameters = new MapSqlParameterSource()
-                    .addValue("id", subscriber.getId());
-            Integer existedEntry = targetJdbcTemplate.queryForObject(sql, parameters, Integer.class);
-            if (existedEntry != null && existedEntry > 0) {
-                subscriber.setWriteStrategy(WriteStrategy.UPDATE);
-            }
+            resolveWriteStrategy(subscriber);
             return subscriber;
         };
+    }
+
+    @Override
+    protected String getCacheName() {
+        return SUBSCRIBERS_CACHE_NAME;
     }
 
     @Bean
@@ -84,7 +77,7 @@ public class SubscriberMigrationStepConfig {
                 .sql("INSERT INTO subscribers(subscriber_id, external_id, firstname, patronymic, lastname, " +
                         "contract_number, account_number, city_id, street_id, house, flat, phone_number, " +
                         "email, balance, is_active, connection_date) " +
-                        "VALUES (nextval('city_id_seq'), :id, :firstname, :patronymic, :lastname, :contractNumber, " +
+                        "VALUES (nextval('subscriber_id_seq'), :id, :firstname, :patronymic, :lastname, :contractNumber, " +
                         ":accountNumber, (SELECT city_id FROM cities ct WHERE ct.external_id = :cityId), " +
                         "(SELECT street_id FROM streets st WHERE st.external_id = :streetId), " +
                         ":house, :flat, :phoneNumber, :email, :balance, :isActive, :connectionDate)")
@@ -120,13 +113,14 @@ public class SubscriberMigrationStepConfig {
     }
 
     @Bean
+    @Transactional
     public Step subscriberMigrationStep(
             JdbcCursorItemReader<Subscriber> sourceSubscriberReader,
             ItemProcessor<Subscriber, Subscriber> subscriberStrategyProcessor,
             ClassifierCompositeItemWriter<Subscriber> classifierCompositeItemWriter
     ) {
         return new StepBuilder("subscriberMigrationStep", jobRepository)
-                .<Subscriber, Subscriber> chunk(10, platformTransactionManager)
+                .<Subscriber, Subscriber> chunk(200, platformTransactionManager)
                 .reader(sourceSubscriberReader)
                 .processor(subscriberStrategyProcessor)
                 .writer(classifierCompositeItemWriter)

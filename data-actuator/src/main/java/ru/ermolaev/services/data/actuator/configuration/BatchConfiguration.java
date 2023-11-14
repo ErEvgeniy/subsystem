@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class BatchConfig {
+public class BatchConfiguration {
 
     @Bean
     public JobRegistryBeanPostProcessor postProcessor(JobRegistry jobRegistry) {

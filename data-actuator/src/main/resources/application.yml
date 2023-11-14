@@ -1,7 +1,4 @@
 spring:
-  main:
-    allow-circular-references: true
-
   batch:
     job:
       enabled: false

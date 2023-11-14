@@ -1,6 +1,6 @@
 package ru.ermolaev.services.data.actuator.step;
 
-import lombok.RequiredArgsConstructor;
+import org.ehcache.CacheManager;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
@@ -15,22 +15,27 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import ru.ermolaev.services.data.actuator.classifier.MigrationDataClassifier;
 import ru.ermolaev.services.data.actuator.model.ChargeTarget;
-import ru.ermolaev.services.data.actuator.model.WriteStrategy;
 
 import javax.sql.DataSource;
 
+import static ru.ermolaev.services.data.actuator.tasklet.ChargeTargetCacheTaskletConfig.CHARGE_TARGETS_CACHE_NAME;
+
 @Configuration
-@RequiredArgsConstructor
-public class ChargeTargetMigrationStepConfig {
+public class ChargeTargetMigrationStepConfig extends AbstractMigrationStepConfig {
 
-    private final JobRepository jobRepository;
-
-    private final PlatformTransactionManager platformTransactionManager;
+    public ChargeTargetMigrationStepConfig(
+            CacheManager cacheManager,
+            JobRepository jobRepository,
+            PlatformTransactionManager platformTransactionManager,
+            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate
+    ) {
+        super(cacheManager, jobRepository, platformTransactionManager, targetJdbcTemplate);
+    }
 
     @Bean
     public JdbcCursorItemReader<ChargeTarget> sourceChargeTargetReader(
@@ -44,18 +49,16 @@ public class ChargeTargetMigrationStepConfig {
     }
 
     @Bean
-    public ItemProcessor<ChargeTarget, ChargeTarget> chargeTargetStrategyProcessor(
-            @Qualifier("targetJdbcTemplate") NamedParameterJdbcTemplate targetJdbcTemplate) {
+    public ItemProcessor<ChargeTarget, ChargeTarget> chargeTargetStrategyProcessor() {
         return chargeTarget -> {
-            String sql = "SELECT COUNT(*) FROM charge_targets WHERE external_id = :id";
-            MapSqlParameterSource parameters = new MapSqlParameterSource()
-                    .addValue("id", chargeTarget.getId());
-            Integer existedEntry = targetJdbcTemplate.queryForObject(sql, parameters, Integer.class);
-            if (existedEntry != null && existedEntry > 0) {
-                chargeTarget.setWriteStrategy(WriteStrategy.UPDATE);
-            }
+            resolveWriteStrategy(chargeTarget);
             return chargeTarget;
         };
+    }
+
+    @Override
+    protected String getCacheName() {
+        return CHARGE_TARGETS_CACHE_NAME;
     }
 
     @Bean
@@ -90,6 +93,7 @@ public class ChargeTargetMigrationStepConfig {
     }
 
     @Bean
+    @Transactional
     public Step chargeTargetMigrationStep(
             JdbcCursorItemReader<ChargeTarget> sourceChargeTargetReader,
             ItemProcessor<ChargeTarget, ChargeTarget> chargeTargetStrategyProcessor,
