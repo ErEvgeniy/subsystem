@@ -18,6 +18,7 @@
 
 	<modules>
 		<module>subscriber-manager</module>
+		<module>data-actuator</module>
 	</modules>
 
 	<properties>
@@ -96,6 +97,7 @@
 					<includeResources>false</includeResources>
 					<includeTestResources>false</includeTestResources>
 					<excludes>**/ru/ermolaev/services/**/mapper/**</excludes>
+					<excludes>**/ru/ermolaev/services/data/actuator/job/**</excludes>
 				</configuration>
 				<executions>
 					<execution>

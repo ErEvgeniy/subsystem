@@ -5,6 +5,12 @@ spring:
     jdbc:
       initialize-schema: always
 
+  liquibase:
+    url: jdbc:postgresql://localhost:5432/sbsdb-migration
+    user: postgres
+    password: root
+    change-log: liquibase/changelog/liquibase-changelog-master.xml
+
   datasource:
     source-db:
       url: jdbc:ucanaccess://D:\\date.mdb;ignoreCase=true;showSchema=true;memory=false
@@ -20,3 +26,7 @@ spring:
       username: postgres
       password: root
       driver-class-name: org.postgresql.Driver
+
+migration:
+  job:
+    cron: 0 0 1 * * *

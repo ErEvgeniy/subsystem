@@ -1,0 +1,6 @@
+CREATE TABLE MIGRATION_LOCK
+(
+    LOCK_ID               BIGINT,
+    LOCKED                BOOLEAN,
+    PRIMARY KEY (LOCK_ID)
+);
