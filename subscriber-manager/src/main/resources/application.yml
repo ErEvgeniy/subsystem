@@ -28,3 +28,10 @@ spring:
           provider_configuration_file_resource_path: classpath:ehcache.xml
           region:
             factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+
+  messages:
+    basename: "i18n/notificationtemplates"
+    encoding: "UTF-8"
+
+application:
+  locale: ru_RU

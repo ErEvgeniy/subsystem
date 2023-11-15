@@ -1,9 +1,9 @@
-package ru.ermolaev.services.subscriber.manager.configuration;
+package ru.ermolaev.services.notificator.sms.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -15,11 +15,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMqConfiguration {
 
-	public static final String MIGRATION_EXCHANGE_NAME = "migration-exchange";
-
-	public static final String NOTIFICATION_REQUEST_EXCHANGE_NAME = "notification-request-exchange";
-
-	public static final String NOTIFICATION_RESULT_EXCHANGE_NAME = "notification-result-exchange";
+	@Bean
+	public ObjectMapper objectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new JavaTimeModule());
+		return objectMapper;
+	}
 
 	@Bean
 	public Jackson2JsonMessageConverter jsonConverter(ObjectMapper objectMapper) {
@@ -37,30 +38,25 @@ public class RabbitMqConfiguration {
 	}
 
 	@Bean
-	public DirectExchange migrationExchange() {
-		return new DirectExchange(MIGRATION_EXCHANGE_NAME);
+	public Queue smsQueue() {
+		return new Queue("sms-queue");
 	}
 
 	@Bean
 	public TopicExchange notificationRequestExchange() {
-		return new TopicExchange(NOTIFICATION_REQUEST_EXCHANGE_NAME);
+		return new TopicExchange("notification-request-exchange");
+	}
+
+	@Bean
+	public Binding smsNotificationBinding() {
+		return BindingBuilder.bind(smsQueue())
+				.to(notificationRequestExchange())
+				.with("notification.sms");
 	}
 
 	@Bean
 	public TopicExchange notificationResultExchange() {
-		return new TopicExchange(NOTIFICATION_RESULT_EXCHANGE_NAME);
-	}
-
-	@Bean
-	public Queue notificationResultQueue() {
-		return new Queue("notification-subs-result-queue");
-	}
-
-	@Bean
-	public Binding notificationResultBinding() {
-		return BindingBuilder.bind(notificationResultQueue())
-				.to(notificationResultExchange())
-				.with("notification.subs.result");
+		return new TopicExchange("notification-result-exchange");
 	}
 
 }
