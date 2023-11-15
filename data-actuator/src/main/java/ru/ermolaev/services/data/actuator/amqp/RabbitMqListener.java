@@ -14,7 +14,7 @@ public class RabbitMqListener {
 	private final MigrationService migrationService;
 
 	@RabbitListener(queues = "migration-queue")
-	public void processStatCalcCommandsMessages(String message) {
+	public void processMigrationRequest(String message) {
 		log.info("Received request: {} from migration-queue", message);
 		migrationService.startMigration();
 	}
