@@ -1,0 +1,8 @@
+server:
+  port: 8260
+
+spring:
+  application:
+    name: notificator-email
+  config:
+    import: configserver:http://localhost:8220

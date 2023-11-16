@@ -1,37 +1,8 @@
 server:
-  port: 8088
+  port: 8230
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/sbsdb
-    username: postgres
-    password: root
-    driver-class-name: org.postgresql.Driver
-  liquibase:
-    url: jdbc:postgresql://localhost:5432/sbsdb
-    user: postgres
-    password: root
-    change-log: liquibase/changelog/liquibase-changelog-master.xml
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    open-in-view: false
-    show-sql: true
-    properties:
-      persistence:
-        sharedCache:
-          mode: ENABLE_SELECTIVE
-      hibernate:
-        format_sql: true
-        cache:
-          use_second_level_cache: true
-          provider_configuration_file_resource_path: classpath:ehcache.xml
-          region:
-            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
-
-  messages:
-    basename: "i18n/notificationtemplates"
-    encoding: "UTF-8"
-
-application:
-  locale: ru_RU
+  application:
+    name: subscriber-manager
+  config:
+    import: configserver:http://localhost:8220

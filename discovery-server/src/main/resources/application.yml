@@ -1,0 +1,8 @@
+server:
+  port: 8210
+
+spring:
+  application:
+    name: discovery-server
+  config:
+    import: configserver:http://localhost:8220
