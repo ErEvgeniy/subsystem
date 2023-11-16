@@ -20,9 +20,7 @@
 		<module>subscriber-manager</module>
 		<module>data-actuator</module>
 		<module>notificator</module>
-		<module>configuration-server</module>
-		<module>discovery-server</module>
-		<module>gateway-server</module>
+		<module>cloud</module>
 	</modules>
 
 	<properties>
