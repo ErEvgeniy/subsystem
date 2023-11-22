@@ -1,4 +1,4 @@
-package ru.ermolaev.services.subscriber.manager.amqp;
+package ru.ermolaev.services.subscriber.manager.integration.amqp;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

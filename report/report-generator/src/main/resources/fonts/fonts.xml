@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+	<fontFamily name="Calibri">
+		<normal><![CDATA[fonts/calibri.ttf]]></normal>
+		<bold><![CDATA[fonts/calibrib.ttf]]></bold>
+		<italic><![CDATA[fonts/calibrii.ttf]]></italic>
+		<pdfEncoding><![CDATA[Identity-H]]></pdfEncoding>
+		<pdfEmbedded><![CDATA[true]]></pdfEmbedded>
+	</fontFamily>
+</fontFamilies>

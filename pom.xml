@@ -21,6 +21,7 @@
 		<module>data-actuator</module>
 		<module>notificator</module>
 		<module>cloud</module>
+		<module>report</module>
 	</modules>
 
 	<properties>
@@ -37,6 +38,7 @@
 		<lombok.version>1.18.28</lombok.version>
 		<spring-cloud.version>2022.0.4</spring-cloud.version>
 		<springdoc-openapi.version>2.2.0</springdoc-openapi.version>
+		<jasperreports.version>6.20.5</jasperreports.version>
 	</properties>
 
 	<dependencyManagement>
@@ -83,6 +85,11 @@
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
 				<version>${springdoc-openapi.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>net.sf.jasperreports</groupId>
+				<artifactId>jasperreports</artifactId>
+				<version>${jasperreports.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -118,7 +125,6 @@
 					<includeResources>false</includeResources>
 					<includeTestResources>false</includeTestResources>
 					<excludes>**/ru/ermolaev/services/**/mapper/**</excludes>
-					<excludes>**/ru/ermolaev/services/data/actuator/job/**</excludes>
 				</configuration>
 				<executions>
 					<execution>
