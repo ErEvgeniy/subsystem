@@ -6,9 +6,3 @@ spring:
     name: report-generator
   config:
     import: configserver:http://localhost:8220
-
-  cache:
-    type: jcache
-    jcache:
-      config: classpath:ehcache.xml
-
