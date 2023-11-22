@@ -117,7 +117,7 @@
 
 		<dependency>
 			<groupId>ru.ermolaev.services</groupId>
-			<artifactId>notificator-models</artifactId>
+			<artifactId>notification-models</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>

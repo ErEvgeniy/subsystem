@@ -1,6 +1,6 @@
 package ru.ermolaev.services.subscriber.manager.service;
 
-import ru.ermolaev.services.notificator.model.NotificationResult;
+import ru.ermolaev.services.notification.models.model.NotificationResult;
 import ru.ermolaev.services.subscriber.manager.rest.dto.NotificationDto;
 
 import java.util.List;

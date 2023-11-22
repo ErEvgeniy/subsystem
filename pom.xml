@@ -19,7 +19,7 @@
 	<modules>
 		<module>subscriber-manager</module>
 		<module>data-actuator</module>
-		<module>notificator</module>
+		<module>notification</module>
 		<module>cloud</module>
 		<module>report</module>
 	</modules>

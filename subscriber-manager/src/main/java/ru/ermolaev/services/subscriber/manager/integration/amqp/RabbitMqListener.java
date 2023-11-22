@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
-import ru.ermolaev.services.notificator.model.NotificationResult;
+import ru.ermolaev.services.notification.models.model.NotificationResult;
 import ru.ermolaev.services.subscriber.manager.service.NotificationService;
 
 @Slf4j

@@ -7,13 +7,16 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.ermolaev.services.notificator.model.ClientNotification;
-import ru.ermolaev.services.notificator.model.NotificationResult;
-import ru.ermolaev.services.notificator.model.NotificationStatus;
+import ru.ermolaev.services.notification.models.model.ClientNotification;
+import ru.ermolaev.services.notification.models.model.EmailNotification;
+import ru.ermolaev.services.notification.models.model.NotificationResult;
+import ru.ermolaev.services.notification.models.constant.NotificationStatus;
+import ru.ermolaev.services.notification.models.model.SmsNotification;
 import ru.ermolaev.services.subscriber.manager.constant.NotificationChannel;
 import ru.ermolaev.services.subscriber.manager.constant.NotificationTemplate;
 import ru.ermolaev.services.subscriber.manager.domain.Notification;
 import ru.ermolaev.services.subscriber.manager.domain.Subscriber;
+import ru.ermolaev.services.subscriber.manager.exception.BusinessException;
 import ru.ermolaev.services.subscriber.manager.mapper.NotificationMapper;
 import ru.ermolaev.services.subscriber.manager.property.LocaleProvider;
 import ru.ermolaev.services.subscriber.manager.repository.NotificationRepository;
@@ -49,17 +52,36 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationChannel channel = resolveChannel(channelName);
         Subscriber subscriber = getSubscriber(subscriberId);
         Notification notification = createNotification(template, subscriber, channel);
-
-        ClientNotification clientNotification = new ClientNotification();
-        clientNotification.setId(notification.getId());
-        clientNotification.setMessage(notification.getMessage());
-        clientNotification.setDestination(notification.getDestination());
-
         String routingKey = resolveRoutingKey(channel);
+
+        ClientNotification clientNotification;
+
+        // TODO change switch logic to strategy
+        switch (channel) {
+            case SMS -> clientNotification = createSmsNotification(notification);
+            case EMAIL -> clientNotification = createEmailNotification(notification);
+            default -> throw new BusinessException("Unsupported notification channel");
+        }
 
         log.info("Send request: {} for notify subscriber: {} by {}",
                 notification.getId(), subscriberId, channel);
         rabbitTemplate.convertAndSend(NOTIFICATION_REQUEST_EXCHANGE_NAME, routingKey, clientNotification);
+    }
+
+    private SmsNotification createSmsNotification(Notification domain) {
+        SmsNotification smsNotification = new SmsNotification();
+        smsNotification.setId(domain.getId());
+        smsNotification.setMessage(domain.getMessage());
+        smsNotification.setPhoneNumber(domain.getDestination());
+        return smsNotification;
+    }
+
+    private EmailNotification createEmailNotification(Notification domain) {
+        EmailNotification emailNotification = new EmailNotification();
+        emailNotification.setId(domain.getId());
+        emailNotification.setMessage(domain.getMessage());
+        emailNotification.setEmail(domain.getDestination());
+        return emailNotification;
     }
 
     private NotificationChannel resolveChannel(String channelName) {
