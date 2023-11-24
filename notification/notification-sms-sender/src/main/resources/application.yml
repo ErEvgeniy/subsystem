@@ -3,6 +3,6 @@ server:
 
 spring:
   application:
-    name: notificator-sms
+    name: notification-sms-sender
   config:
-    import: configserver:http://localhost:8220
+    import: optional:configserver:http://localhost:8220
