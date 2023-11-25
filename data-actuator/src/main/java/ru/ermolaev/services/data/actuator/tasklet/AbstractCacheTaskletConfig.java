@@ -21,13 +21,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public abstract class AbstractCacheTaskletConfig {
 
-    protected final JobRepository jobRepository;
+    private final JobRepository jobRepository;
 
-    protected final CacheManager cacheManager;
+    private final CacheManager cacheManager;
 
-    protected final PlatformTransactionManager platformTransactionManager;
+    private final PlatformTransactionManager platformTransactionManager;
 
-    protected final NamedParameterJdbcTemplate targetJdbcTemplate;
+    private final NamedParameterJdbcTemplate targetJdbcTemplate;
 
     protected TaskletStep buildCreateAndLoadCacheTaskletStep() {
         return new StepBuilder(getCreateAndLoadTaskletStepName(), jobRepository)

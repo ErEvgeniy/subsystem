@@ -107,8 +107,8 @@ public class ChargeMigrationStepConfig extends AbstractMigrationStepConfig {
             ItemProcessor<Charge, Charge> chargeStrategyProcessor,
             ClassifierCompositeItemWriter<Charge> classifierCompositeItemWriter
     ) {
-        return new StepBuilder("chargeMigrationStep", jobRepository)
-                .<Charge, Charge> chunk(200, platformTransactionManager)
+        return new StepBuilder("chargeMigrationStep", getJobRepository())
+                .<Charge, Charge> chunk(200, getPlatformTransactionManager())
                 .reader(sourceChargeReader)
                 .processor(chargeStrategyProcessor)
                 .writer(classifierCompositeItemWriter)

@@ -77,7 +77,8 @@ public class SubscriberMigrationStepConfig extends AbstractMigrationStepConfig {
                 .sql("INSERT INTO subscribers(subscriber_id, external_id, firstname, patronymic, lastname, " +
                         "contract_number, account_number, city_id, street_id, house, flat, phone_number, " +
                         "email, balance, is_active, connection_date) " +
-                        "VALUES (nextval('subscriber_id_seq'), :id, :firstname, :patronymic, :lastname, :contractNumber, " +
+                        "VALUES (nextval('subscriber_id_seq'), :id, :firstname, " +
+                        ":patronymic, :lastname, :contractNumber, " +
                         ":accountNumber, (SELECT city_id FROM cities ct WHERE ct.external_id = :cityId), " +
                         "(SELECT street_id FROM streets st WHERE st.external_id = :streetId), " +
                         ":house, :flat, :phoneNumber, :email, :balance, :isActive, :connectionDate)")
@@ -119,8 +120,8 @@ public class SubscriberMigrationStepConfig extends AbstractMigrationStepConfig {
             ItemProcessor<Subscriber, Subscriber> subscriberStrategyProcessor,
             ClassifierCompositeItemWriter<Subscriber> classifierCompositeItemWriter
     ) {
-        return new StepBuilder("subscriberMigrationStep", jobRepository)
-                .<Subscriber, Subscriber> chunk(200, platformTransactionManager)
+        return new StepBuilder("subscriberMigrationStep", getJobRepository())
+                .<Subscriber, Subscriber> chunk(200, getPlatformTransactionManager())
                 .reader(sourceSubscriberReader)
                 .processor(subscriberStrategyProcessor)
                 .writer(classifierCompositeItemWriter)

@@ -99,8 +99,8 @@ public class CityMigrationStepConfig extends AbstractMigrationStepConfig {
             ItemProcessor<City, City> cityStrategyProcessor,
             ClassifierCompositeItemWriter<City> classifierCompositeItemWriter
     ) {
-        return new StepBuilder("cityMigrationStep", jobRepository)
-                .<City, City> chunk(10, platformTransactionManager)
+        return new StepBuilder("cityMigrationStep", getJobRepository())
+                .<City, City> chunk(10, getPlatformTransactionManager())
                 .reader(sourceCityReader)
                 .processor(cityStrategyProcessor)
                 .writer(classifierCompositeItemWriter)

@@ -109,8 +109,8 @@ public class PaymentMigrationStepConfig extends AbstractMigrationStepConfig {
             ItemProcessor<Payment, Payment> paymentStrategyProcessor,
             ClassifierCompositeItemWriter<Payment> classifierCompositeItemWriter
     ) {
-        return new StepBuilder("paymentMigrationStep", jobRepository)
-                .<Payment, Payment> chunk(200, platformTransactionManager)
+        return new StepBuilder("paymentMigrationStep", getJobRepository())
+                .<Payment, Payment> chunk(200, getPlatformTransactionManager())
                 .reader(sourcePaymentReader)
                 .processor(paymentStrategyProcessor)
                 .writer(classifierCompositeItemWriter)

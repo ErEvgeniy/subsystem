@@ -99,8 +99,8 @@ public class StreetMigrationStepConfig extends AbstractMigrationStepConfig {
             ItemProcessor<Street, Street> streetStrategyProcessor,
             ClassifierCompositeItemWriter<Street> classifierCompositeItemWriter
     ) {
-        return new StepBuilder("streetMigrationStep", jobRepository)
-                .<Street, Street> chunk(10, platformTransactionManager)
+        return new StepBuilder("streetMigrationStep", getJobRepository())
+                .<Street, Street> chunk(10, getPlatformTransactionManager())
                 .reader(sourceStreetReader)
                 .processor(streetStrategyProcessor)
                 .writer(classifierCompositeItemWriter)
