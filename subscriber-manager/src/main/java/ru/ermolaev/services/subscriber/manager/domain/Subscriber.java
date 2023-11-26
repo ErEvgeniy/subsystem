@@ -22,6 +22,7 @@ import org.hibernate.annotations.FetchMode;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @NamedEntityGraph(
         name = "subscriber-and-address-graph",
@@ -111,5 +112,59 @@ public class Subscriber {
 
     @Column(name = "CONNECTION_DATE")
     private LocalDate connectionDate;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Subscriber that)) {
+            return false;
+        }
+        return Objects.equals(id, that.id) &&
+                Objects.equals(externalId, that.externalId) &&
+                Objects.equals(firstname, that.firstname) &&
+                Objects.equals(patronymic, that.patronymic) &&
+                Objects.equals(lastname, that.lastname) &&
+                Objects.equals(contractNumber, that.contractNumber) &&
+                Objects.equals(accountNumber, that.accountNumber) &&
+                Objects.equals(city, that.city) &&
+                Objects.equals(street, that.street) &&
+                Objects.equals(house, that.house) &&
+                Objects.equals(flat, that.flat) &&
+//                Objects.equals(phoneNumber, that.phoneNumber) &&
+                Objects.equals(email, that.email) &&
+                Objects.equals(balance, that.balance) &&
+                Objects.equals(isActive, that.isActive) &&
+                Objects.equals(connectionDate, that.connectionDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, externalId, firstname, patronymic, lastname, contractNumber, accountNumber,
+                city, street, house, flat, phoneNumber, email, balance, isActive, connectionDate);
+    }
+
+    @Override
+    public String toString() {
+        return "Subscriber{" +
+                "id=" + id +
+                ", externalId=" + externalId +
+                ", firstname='" + firstname + '\'' +
+                ", patronymic='" + patronymic + '\'' +
+                ", lastname='" + lastname + '\'' +
+                ", contractNumber='" + contractNumber + '\'' +
+                ", accountNumber='" + accountNumber + '\'' +
+                ", city=" + city +
+                ", street=" + street +
+                ", house=" + house +
+                ", flat=" + flat +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", email='" + email + '\'' +
+                ", balance=" + balance +
+                ", isActive=" + isActive +
+                ", connectionDate=" + connectionDate +
+                '}';
+    }
 
 }

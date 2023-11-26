@@ -11,6 +11,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import java.util.Objects;
+
 @Getter
 @Setter
 @Entity
@@ -30,5 +32,32 @@ public class City {
 
     @Column(name = "NAME", nullable = false, unique = true)
     private String name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof City city)) {
+            return false;
+        }
+        return Objects.equals(id, city.id) &&
+                Objects.equals(externalId, city.externalId) &&
+                Objects.equals(name, city.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, externalId, name);
+    }
+
+    @Override
+    public String toString() {
+        return "City{" +
+                "id=" + id +
+                ", externalId=" + externalId +
+                ", name='" + name + '\'' +
+                '}';
+    }
 
 }

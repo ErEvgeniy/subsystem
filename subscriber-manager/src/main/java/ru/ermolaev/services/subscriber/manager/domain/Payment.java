@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @NamedEntityGraph(
         name = "payment-full-join-graph",
@@ -63,5 +64,42 @@ public class Payment {
 
     @Column(name = "COMMENT")
     private String comment;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Payment payment)) {
+            return false;
+        }
+        return Objects.equals(id, payment.id) &&
+                Objects.equals(externalId, payment.externalId) &&
+                Objects.equals(paymentDate, payment.paymentDate) &&
+                Objects.equals(paymentChannel, payment.paymentChannel) &&
+                Objects.equals(subscriber, payment.subscriber) &&
+                Objects.equals(amount, payment.amount) &&
+                Objects.equals(period, payment.period) &&
+                Objects.equals(comment, payment.comment);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, externalId, paymentDate, paymentChannel, subscriber, amount, period, comment);
+    }
+
+    @Override
+    public String toString() {
+        return "Payment{" +
+                "id=" + id +
+                ", externalId=" + externalId +
+                ", paymentDate=" + paymentDate +
+                ", paymentChannel=" + paymentChannel +
+                ", subscriber=" + subscriber +
+                ", amount=" + amount +
+                ", period='" + period + '\'' +
+                ", comment='" + comment + '\'' +
+                '}';
+    }
 
 }

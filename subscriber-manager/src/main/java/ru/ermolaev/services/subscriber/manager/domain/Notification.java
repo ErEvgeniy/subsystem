@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @NamedEntityGraph(
         name = "notification-and-subscriber-graph",
@@ -56,5 +57,42 @@ public class Notification {
 
     @Column(name = "REASON")
     private String reason;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Notification that)) {
+            return false;
+        }
+        return Objects.equals(id, that.id) &&
+                Objects.equals(sentDate, that.sentDate) &&
+                Objects.equals(subscriber, that.subscriber) &&
+                Objects.equals(status, that.status) &&
+                Objects.equals(message, that.message) &&
+                Objects.equals(channel, that.channel) &&
+                Objects.equals(destination, that.destination) &&
+                Objects.equals(reason, that.reason);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, sentDate, subscriber, status, message, channel, destination, reason);
+    }
+
+    @Override
+    public String toString() {
+        return "Notification{" +
+                "id=" + id +
+                ", sentDate=" + sentDate +
+                ", subscriber=" + subscriber +
+                ", status='" + status + '\'' +
+                ", message='" + message + '\'' +
+                ", channel='" + channel + '\'' +
+                ", destination='" + destination + '\'' +
+                ", reason='" + reason + '\'' +
+                '}';
+    }
 
 }
