@@ -1,0 +1,233 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:14
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_MULTIPLE_DATABASES="sbsdb","sbsdb-migration","keycloak"
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./.docker/scripts/postgres/pg-init-scripts:/docker-entrypoint-initdb.d
+      - ./.docker/volumes/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  keycloak:
+    image: jboss/keycloak
+    restart: on-failure
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=admin
+      - DB_VENDOR=POSTGRES
+      - DB_ADDR=postgres
+      - DB_DATABASE=keycloak
+      - DB_USER=postgres
+      - DB_PASSWORD=root
+    command: ["-Djboss.http.port=8888"]
+    ports:
+      - '8888:8888'
+    volumes:
+      - ./.docker/volumes/keycloak:/opt/jboss/keycloak/standalone/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    restart: on-failure
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - ./.docker/volumes/rabbitmq:/var/lib/rabbitmq
+    ports:
+      - '15672:15672'
+      - '5672:5672'
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  zipkin:
+    restart: on-failure
+    image: openzipkin/zipkin
+    ports:
+      - '9411:9411'
+
+  configuration-server:
+    restart: on-failure
+    build:
+      context: ./cloud/configuration-server
+      dockerfile: Dockerfile
+    container_name: 'configuration-server'
+    ports:
+      - '8220:8220'
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8220/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  discovery-server:
+    restart: on-failure
+    build:
+      context: ./cloud/discovery-server
+      dockerfile: Dockerfile
+    container_name: 'discovery-server'
+    ports:
+      - '8210:8210'
+    depends_on:
+      configuration-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8210/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  gateway-server:
+    restart: on-failure
+    build:
+      context: ./cloud/gateway-server
+      dockerfile: Dockerfile
+    container_name: 'gateway-server'
+    ports:
+      - '8200:8200'
+    depends_on:
+      configuration-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8200/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  subscriber-manager:
+    restart: on-failure
+    build:
+      context: ./subscriber-manager
+      dockerfile: Dockerfile
+    container_name: 'subscriber-manager'
+    ports:
+      - '8230:8230'
+    depends_on:
+      configuration-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8230/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  data-actuator:
+    restart: on-failure
+    build:
+      context: ./data-actuator
+      dockerfile: Dockerfile
+    container_name: 'data-actuator'
+    ports:
+      - '8240:8240'
+    volumes:
+      - ./.docker/payload/data-actuator:/tmp
+    depends_on:
+      configuration-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8240/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  report-generator:
+    restart: on-failure
+    build:
+      context: ./report/report-generator
+      dockerfile: Dockerfile
+    container_name: 'report-generator'
+    ports:
+      - '8250:8250'
+    depends_on:
+      configuration-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8250/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  notification-email-sender:
+    restart: on-failure
+    build:
+      context: ./notification/notification-email-sender
+      dockerfile: Dockerfile
+    container_name: 'notification-email-sender'
+    ports:
+      - '8260:8260'
+    depends_on:
+      configuration-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8260/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  notification-sms-sender:
+    restart: on-failure
+    build:
+      context: ./notification/notification-sms-sender
+      dockerfile: Dockerfile
+    container_name: 'notification-sms-sender'
+    ports:
+      - '8270:8270'
+    depends_on:
+      configuration-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --request GET http://localhost:8270/actuator/health | jq --exit-status -n 'inputs | if has(\"status\") then .status==\"UP\" else false end' > /dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3

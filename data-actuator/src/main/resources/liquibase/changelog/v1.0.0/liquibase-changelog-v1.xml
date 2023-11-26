@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+	<changeSet failOnError="true" author="eermolaev" id="create-lock-table"
+			   logicalFilePath="v1.0.0/sql/create-lock-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-lock-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+	<changeSet failOnError="true" author="eermolaev" id="init-data"
+			   logicalFilePath="v1.0.0/sql/init-data.sql">
+		<sqlFile encoding="utf8" path="sql/init-data.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+</databaseChangeLog>

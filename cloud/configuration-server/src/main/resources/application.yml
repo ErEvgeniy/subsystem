@@ -1,0 +1,26 @@
+server:
+  port: 8220
+
+spring:
+  application:
+    name: configuration-server
+  cloud:
+    bus:
+      enabled: true
+      refresh:
+        enabled: true
+    config:
+      server:
+        git:
+          uri: https://github.com/ErEvgeniy/subsystem-config
+          search-paths: {application}
+          default-label: main
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, busrefresh
+  endpoint:
+    health:
+      show-details: always

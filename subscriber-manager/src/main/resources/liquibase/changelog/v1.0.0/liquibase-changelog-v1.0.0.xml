@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+	<changeSet failOnError="true" author="eermolaev" id="create-cities-table"
+			   logicalFilePath="v1.0.0/sql/create-cities-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-cities-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+	<changeSet failOnError="true" author="eermolaev" id="create-streets-table"
+			   logicalFilePath="v1.0.0/sql/create-streets-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-streets-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+	<changeSet failOnError="true" author="eermolaev" id="create-charge-targets-table"
+			   logicalFilePath="v1.0.0/sql/create-charge-targets-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-charge-targets-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+	<changeSet failOnError="true" author="eermolaev" id="create-payment-channels-table"
+			   logicalFilePath="v1.0.0/sql/create-payment-channels-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-payment-channels-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+	<changeSet failOnError="true" author="eermolaev" id="create-charges-table"
+			   logicalFilePath="v1.0.0/sql/create-charges-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-charges-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+	<changeSet failOnError="true" author="eermolaev" id="create-payments-table"
+			   logicalFilePath="v1.0.0/sql/create-payments-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-payments-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+	<changeSet failOnError="true" author="eermolaev" id="create-subscribers-table"
+			   logicalFilePath="v1.0.0/sql/create-subscribers-table.sql">
+		<sqlFile encoding="utf8" path="sql/create-subscribers-table.sql" relativeToChangelogFile="true"/>
+	</changeSet>
+
+</databaseChangeLog>

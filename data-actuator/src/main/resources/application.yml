@@ -1,0 +1,8 @@
+server:
+  port: 8240
+
+spring:
+  application:
+    name: data-actuator
+  config:
+    import: optional:configserver:http://localhost:8220

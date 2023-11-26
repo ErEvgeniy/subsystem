@@ -1,0 +1,8 @@
+server:
+  port: 8260
+
+spring:
+  application:
+    name: notification-email-sender
+  config:
+    import: optional:configserver:http://localhost:8220
