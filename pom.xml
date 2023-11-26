@@ -20,6 +20,7 @@
 		<module>subscriber-manager</module>
 		<module>data-actuator</module>
 		<module>notificator</module>
+		<module>cloud</module>
 	</modules>
 
 	<properties>
@@ -34,10 +35,18 @@
 		<h2.version>2.2.220</h2.version>
 		<mapstruct.version>1.5.5.Final</mapstruct.version>
 		<lombok.version>1.18.28</lombok.version>
+		<spring-cloud.version>2022.0.4</spring-cloud.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>com.github.cloudyrock.mongock</groupId>
 				<artifactId>mongock-spring-v5</artifactId>
@@ -82,6 +91,11 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
