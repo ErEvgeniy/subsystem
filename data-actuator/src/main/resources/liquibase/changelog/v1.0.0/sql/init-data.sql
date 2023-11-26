@@ -1,0 +1,1 @@
+INSERT INTO migration_lock(lock_id, locked) VALUES (1, FALSE);

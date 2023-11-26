@@ -1,0 +1,32 @@
+spring:
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+  liquibase:
+    url: jdbc:postgresql://localhost:5432/sbsdb-migration
+    user: postgres
+    password: root
+    change-log: liquibase/changelog/liquibase-changelog-master.xml
+
+  datasource:
+    source-db:
+      url: jdbc:ucanaccess://D:\\date.mdb;ignoreCase=true;showSchema=true;memory=false
+      username: Admin
+      driver-class-name: net.ucanaccess.jdbc.UcanaccessDriver
+    target-db:
+      url: jdbc:postgresql://localhost:5432/sbsdb
+      username: postgres
+      password: root
+      driver-class-name: org.postgresql.Driver
+    migration-db:
+      url: jdbc:postgresql://localhost:5432/sbsdb-migration
+      username: postgres
+      password: root
+      driver-class-name: org.postgresql.Driver
+
+migration:
+  job:
+    cron: 0 0 1 * * *
