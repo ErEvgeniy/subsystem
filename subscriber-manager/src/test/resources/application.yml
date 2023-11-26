@@ -24,3 +24,6 @@ spring:
                 - sql/insert_payment_channels.sql
                 - sql/insert_payments.sql
                 - sql/insert_notifications.sql
+
+keycloak:
+    resourceName: "test-app"
