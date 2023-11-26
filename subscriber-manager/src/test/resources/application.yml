@@ -1,0 +1,26 @@
+spring:
+    cloud:
+      config:
+          enabled: false
+    liquibase:
+        enabled: false
+    datasource:
+        url: jdbc:h2:mem:testdb
+    jpa:
+        defer-datasource-initialization: true
+        properties:
+          hibernate:
+            cache:
+                use_second_level_cache: false
+    sql:
+        init:
+            mode: always
+            data-locations:
+                - sql/insert_cities.sql
+                - sql/insert_streets.sql
+                - sql/insert_subscribers.sql
+                - sql/insert_charge_targets.sql
+                - sql/insert_charges.sql
+                - sql/insert_payment_channels.sql
+                - sql/insert_payments.sql
+                - sql/insert_notifications.sql
