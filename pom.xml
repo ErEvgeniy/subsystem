@@ -19,6 +19,7 @@
 	<modules>
 		<module>subscriber-manager</module>
 		<module>data-actuator</module>
+		<module>notificator</module>
 	</modules>
 
 	<properties>
